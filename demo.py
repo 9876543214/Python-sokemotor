@@ -36,7 +36,7 @@ def velg_fil(tall):
     while True:
         valgtfil = input("Velg en fil: ")
         riktig_filnavn = False
-        for file in dirlist:
+        for file in dirlist: #sjekker om filnavn finnes
             if valgtfil == file:
                 riktig_filnavn = True
         if riktig_filnavn == False:
@@ -48,15 +48,15 @@ def velg_fil(tall):
     elif tall == "3":
         skriv_til_fil(valgtfil)
     else:
-        input("Det skjedde en feil. Trykk en tast for å prøve igjen")
+        input("Det skjedde en feil. Trykk en tast for å prøve igjen") #Hvis tall er udefinert
         start()
 
-def søk_i_fil(filnavn):    
+def søk_i_fil(filnavn): 
     if not filnavn == None:
         while True:
             print(" ")
             print("Du kan søke etter tegn, ord eller setninger i fil " + filnavn + ".")
-            søk = input("Søk: ")                
+            søk = input("Søk: ")
             finnsøk(søk, filnavn)
             while True:
                 print(" ")
