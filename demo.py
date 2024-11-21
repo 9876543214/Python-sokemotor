@@ -1,8 +1,11 @@
 import os
 import re
+import sys
 from colorama import init, Back, Style #Farger
 import json
 import pyautogui #Kan imitere brukerinput
+import subprocess
+import time
 
 filepath = ("C:\\Users\\Ulrik\\Python\\Oppdrag søkemotor\\Tekstfiler") # Bytt til egen filvei
 dirlist = os.listdir(filepath)
@@ -19,7 +22,8 @@ def start():
     if menyvalg == "1":
         velg_fil(menyvalg)
     elif menyvalg == "2":
-        søk_alle_filer()
+        none = None
+        søk_i_fil(none)
     elif menyvalg == "3":
         velg_fil(menyvalg)
     elif menyvalg == "4":
@@ -52,30 +56,15 @@ def velg_fil(tall):
         start()
 
 def søk_i_fil(filnavn): 
-    if not filnavn == None:
-        while True:
-            print(" ")
-            print("Du kan søke etter tegn, ord eller setninger i fil " + filnavn + ".")
-            søk = input("Søk: ")
-            finnsøk(søk, filnavn)
-            while True:
-                print(" ")
-                søk_igjen = input("Vil du søke igjen? Y/N: ")
-                if søk_igjen == "N" or søk_igjen == "n" or søk_igjen == "Y" or søk_igjen == "y":
-                    break
-                else:
-                    input("Ugyldig input. Trykk en tast for å prøve igjen.")
-            if søk_igjen == "N" or søk_igjen == "n":
-                break
-        start()
-
-def søk_alle_filer():
     while True:
         print(" ")
-        print("Du kan søke etter tegn, ord eller setninger i alle filer")
+        print("Du kan søke etter tegn, ord eller setninger:")
         søk = input("Søk: ")
-        for file in dirlist:
-            finnsøk(søk, file)
+        if filnavn != None:
+            finnsøk(søk, filnavn)
+        else:
+            for file in dirlist:
+                finnsøk(søk, file)
         while True:
             print(" ")
             søk_igjen = input("Vil du søke igjen? Y/N: ")
@@ -86,6 +75,7 @@ def søk_alle_filer():
         if søk_igjen == "N" or søk_igjen == "n":
             break
     start()
+
 
 def finnsøk(søk, filnavn):
     print(" ")
@@ -113,44 +103,76 @@ def finnsøk(søk, filnavn):
                 print("Fant ikke søk i fil " + filnavn)
         else:
             print(" ")
-            print(treff + " funnet i fil " + filnavn)
+            print(treff, "treff funnet i fil " + filnavn)
 
 
 def skriv_til_fil(valgtfil):
-    path = os.path.join(filepath, valgtfil)
-    f = open(path, "r")
+    path = os.path.join(filepath, valgtfil)    
+    f = open(path, "r") #Åpne fil som r for å lese antall linjer
     lines = f.readlines()
-    wf = open(path, "a+")
+    wf = open(path, "a+") #Åpnet som a+ for å redigere og skrive nytt
     total_linjer = len(lines)
     total_linjer_str = json.dumps(total_linjer)  
-    while True:
-        print("Velg en linje fra 1-" + total_linjer_str + ", eller skriv \"N\" for ny linje", end="")
+    while True: #loop hvis brukerinput er feil
+        print("Velg en linje fra 1-" + total_linjer_str + ", eller skriv \"N\" for ny linje", end="")# input kan ikke ha flere ledd, så måtte skrive ut som print først
         valgt_linje = input(": ")
         try:
-            valgt_linje_int = int(valgt_linje)
+            valgt_linje_int = int(valgt_linje) #sjekker om valgt linje kan bli int
         except ValueError:
-            if valgt_linje == "n" or valgt_linje == "N":
+            if valgt_linje == "n" or valgt_linje == "N": #for å skrive på ny linje
                 print("Skriv inn på ny linje", total_linjer + 1, ":")
                 nytekst = input("Skriv her: ")
-                wf.write(nytekst + "\n")    
+                wf.write("\n" + nytekst)
+                wf.flush()
                 input("Tekst skrevet inn. Trykk en tast for å fortsette.")
                 start()
                 break
             else:
                 input("Ugyldig input. Trykk en tast for å prøve på nytt")
                 continue
-        if 0 < valgt_linje_int <= total_linjer:
-            endre_linje(valgt_linje_int)
+        if 0 < valgt_linje_int <= total_linjer: # sjekker om valgt linje finnes
+            endre_linje(valgt_linje_int, path)
             break
         else:
             print(" ")
             input("Nummer er utenfor rekkevidde. Trykk en tast for å prøve på nytt.")
         
-def endre_linje(tall):
-    pyautogui.typewrite('Hello world!', interval=.1)
+def endre_linje(tall, filvei): #Funksjon for å endre linje som finnes
+    f = open(filvei, "r")
+    
+    tekst = "None"
+    print(" ")
+    print("Rediger linje", tall, "under:")
+    linjenr = 0
+    linjer = f.readlines()
+    for line in linjer:
+        linjenr = linjenr + 1
+        if linjenr == tall:
+            tekst = line.strip()
+            linjenr = 0
+            break
+    for char in tekst: #Skriver ut tekst en og en karakter, men kan ikke endres av bruker
+        sys.stdout.write(char) 
+        sys.stdout.flush()
+        time.sleep(0.02)
+    sys.stdout.write('\r' + '' * len(tekst)) #Fjerner skrevet ut tekst
+    sys.stdout.flush()
+    pyautogui.typewrite(tekst) #skriver inn tekst igjen som bruker, så bruker kan endre
+    #Jeg valgte å gjøre dette for at bruker skulle skjønne at teksten kunne redigeres, og det fungerte ikke med å skrive en og en karakter som brukerinput
     changedline = input("")
+    for line in linjer:
+        linjenr = linjenr + 1
+        if linjenr == tall:
+            wf = open(filvei, "w")
+            linjer[tall - 1] = changedline + "\n"
+            wf.writelines(linjer)
+            wf.flush()
+    input("Linje redigert. Trykk en tast for å fortsette")
+    start()
+
 
 def lag_fil():
     print("Ikke tiljengelig")
+
 
 start()
