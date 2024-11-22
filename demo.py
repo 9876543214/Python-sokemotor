@@ -29,7 +29,7 @@ def start():
     elif menyvalg == "4":
         lag_fil()
     else:
-        input("Ugyldig valg. Trykk en tast for å prøve på nytt")
+        input("Ugyldig valg. Trykk enter for å prøve på nytt")
         start()
 
 def velg_fil(tall):
@@ -44,7 +44,7 @@ def velg_fil(tall):
             if valgtfil == file:
                 riktig_filnavn = True
         if riktig_filnavn == False:
-            input("Fant ikke fil. Trykk en tast for å prøve på nytt.")
+            input("Fant ikke fil. Trykk enter for å prøve på nytt.")
         elif riktig_filnavn == True:
             break
     if tall == "1":
@@ -52,7 +52,7 @@ def velg_fil(tall):
     elif tall == "3":
         skriv_til_fil(valgtfil)
     else:
-        input("Det skjedde en feil. Trykk en tast for å prøve igjen") #Hvis tall er udefinert
+        input("Det skjedde en feil. Trykk enter for å prøve igjen") #Hvis tall er udefinert
         start()
 
 def søk_i_fil(filnavn): 
@@ -60,18 +60,29 @@ def søk_i_fil(filnavn):
         print(" ")
         print("Du kan søke etter tegn, ord eller setninger:")
         søk = input("Søk: ")
-        if filnavn != None:
+        if filnavn != None: #Hvis filnavn er valgt, kjører funksjonen kun en gang
             finnsøk(søk, filnavn)
-        else:
+        else: #Hvis filen ikke er valgt, kjører fungsjonen en gang per fil
+            ferdig = 1
+            totaltreff = 0
             for file in dirlist:
-                finnsøk(søk, file)
+                treff = finnsøk(søk, file)
+                totaltreff = treff + totaltreff
+                if ferdig == int(len(dirlist)):
+                    print(" ")
+                    print("Alle filer sjekket")
+                    print("Totalt", totaltreff, "treff funnet i alle filer")
+                else:    
+                    print(" ")
+                    input("Trykk enter for neste fil.")
+                    ferdig = ferdig + 1
         while True:
             print(" ")
             søk_igjen = input("Vil du søke igjen? Y/N: ")
-            if søk_igjen == "N" or søk_igjen == "n" or søk_igjen == "Y" or søk_igjen == "y":
+            if søk_igjen == "N" or søk_igjen == "n" or søk_igjen == "Y" or søk_igjen == "y": #Sjekker om input er gyldig
                 break
             else:
-                input("Ugyldig input. Trykk en tast for å prøve igjen.")
+                input("Ugyldig input. Trykk enter for å prøve igjen.")
         if søk_igjen == "N" or søk_igjen == "n":
             break
     start()
@@ -79,16 +90,16 @@ def søk_i_fil(filnavn):
 
 def finnsøk(søk, filnavn):
     print(" ")
-    print(Style.BRIGHT, filnavn, ":", Style.NORMAL)
-    file_path = os.path.join(filepath, filnavn)
+    print(Style.BRIGHT, filnavn, ":", Style.NORMAL) #skriver "fillnavn:" i bold tekst
+    file_path = os.path.join(filepath, filnavn) #filvei
     treff = 0
     with open(file_path, 'r') as f:
-        lines = f.readlines()
+        lines = f.readlines() #antall linjer i filen
         søkfunnet = False
         for row in lines:
             if row.find(søk) != -1:
                 print(" ")
-                print("Søk funnet på linje ", lines.index(row) + 1)
+                print("Søk funnet på linje", lines.index(row) + 1)
                 treff = treff + 1
                 highlighted_row = re.sub(
                     f"({re.escape(søk)})",
@@ -104,6 +115,7 @@ def finnsøk(søk, filnavn):
         else:
             print(" ")
             print(treff, "treff funnet i fil " + filnavn)
+            return treff
 
 
 def skriv_til_fil(valgtfil):
@@ -124,22 +136,36 @@ def skriv_til_fil(valgtfil):
                 nytekst = input("Skriv her: ")
                 wf.write("\n" + nytekst)
                 wf.flush()
-                input("Tekst skrevet inn. Trykk en tast for å fortsette.")
+                input("Tekst skrevet inn. Trykk enter for å fortsette.")
                 start()
                 break
             else:
-                input("Ugyldig input. Trykk en tast for å prøve på nytt")
+                input("Ugyldig input. Trykk enter for å prøve på nytt")
                 continue
-        if 0 < valgt_linje_int <= total_linjer: # sjekker om valgt linje finnes
-            endre_linje(valgt_linje_int, path)
+        if total_linjer == 0:
+            print("Fil har ingen linje å redigere.")
+            while True: 
+                skriv_ny_linje = input("Vil du skrive inn på ny linje? Y/N: ")
+                if skriv_ny_linje == "Y" or skriv_ny_linje == "y":
+                    valgt_linje = "n"
+                    break
+                elif skriv_ny_linje == "n" or skriv_ny_linje == "N":
+                    start()
+                    break
+                else:
+                    input("Ugyldig input. Trykk enter for å fortsette")
+
+        elif 0 < valgt_linje_int <= total_linjer: # sjekker om valgt linje finnes
+            endre_linje(valgt_linje_int, path, valgtfil)
             break
         else:
             print(" ")
-            input("Nummer er utenfor rekkevidde. Trykk en tast for å prøve på nytt.")
+            input("Nummer er utenfor rekkevidde. Trykk enter for å prøve på nytt.")
         
-def endre_linje(tall, filvei): #Funksjon for å endre linje som finnes
+
+
+def endre_linje(tall, filvei, fil): #Funksjon for å endre linje som finnes
     f = open(filvei, "r")
-    
     tekst = "None"
     print(" ")
     print("Rediger linje", tall, "under:")
@@ -148,13 +174,13 @@ def endre_linje(tall, filvei): #Funksjon for å endre linje som finnes
     for line in linjer:
         linjenr = linjenr + 1
         if linjenr == tall:
-            tekst = line.strip()
+            tekst = line.strip() # Henter valgt linje
             linjenr = 0
             break
     for char in tekst: #Skriver ut tekst en og en karakter, men kan ikke endres av bruker
         sys.stdout.write(char) 
         sys.stdout.flush()
-        time.sleep(0.02)
+        time.sleep(0.04)
     sys.stdout.write('\r' + '' * len(tekst)) #Fjerner skrevet ut tekst
     sys.stdout.flush()
     pyautogui.typewrite(tekst) #skriver inn tekst igjen som bruker, så bruker kan endre
@@ -167,12 +193,48 @@ def endre_linje(tall, filvei): #Funksjon for å endre linje som finnes
             linjer[tall - 1] = changedline + "\n"
             wf.writelines(linjer)
             wf.flush()
-    input("Linje redigert. Trykk en tast for å fortsette")
-    start()
+    print("Linje redigert.")
+    while True:
+        print(" ")
+        søk_igjen = input("Vil du redigere linje igjen? Y/N: ")
+        if søk_igjen == "N" or søk_igjen == "n":  #Sjekker om input er gyldig
+            start()
+            break
+        elif søk_igjen == "Y" or søk_igjen == "y":
+            skriv_til_fil(fil)
+        else:
+            input("Ugyldig input. Trykk enter for å prøve igjen.")
 
 
 def lag_fil():
-    print("Ikke tiljengelig")
+    global dirlist
+    while True:
+        print(" ")
+        print("Skriv kun filnavn, ikke med .")
+        nyfilnavn = input("Hva vil du kalle filen? :")
+        filtrert_filnavn = nyfilnavn.replace(" ", "-").replace(".", "-") #filtrerer filnavn
+        try:
+            f = open(filepath + "\\" + filtrert_filnavn + ".txt", 'x') #lager filen
+            
+            break
+        except:
+            print("Fil finnes allerede")
+            input("Trykk enter for å prøve igjen.")
+            continue
+    print("Fil opprettet")
+    dirlist = os.listdir(filepath)
+    while True:
+        opprett_igjen = input("Vil du opprette en til fil? Y/N: ")
+        if opprett_igjen == "N" or opprett_igjen == "n":  #Sjekker om input er gyldig
+            start()
+            break
+        elif opprett_igjen == "Y" or opprett_igjen == "y":
+            lag_fil()
+            break
+        else:
+            input("Ugyldig input. Trykk enter for å prøve igjen.")
+
+    
 
 
 start()
