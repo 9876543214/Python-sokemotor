@@ -1,13 +1,11 @@
 import os
 import re
 import sys
-from colorama import init, Back, Style #Farger
-import json
+from colorama import Back, Style #Farger
 import pyautogui #Kan imitere brukerinput
-import subprocess
 import time
 
-filepath = ("C:\\Users\\Ulrik\\Python\\Oppdrag søkemotor\\Tekstfiler") # Bytt til egen filvei
+filepath = ("C:\\Users\\Ulrik\\Python\\Oppdrag_sokemotor\\Tekstfiler") # Bytt til egen filvei
 dirlist = os.listdir(filepath)
 
 def start():
@@ -35,18 +33,25 @@ def start():
 def velg_fil(tall):
     print(" ")
     print("Tiljengelige filer:")
+    filenr = 0
     for file in dirlist:
-        print(file)
+        filenr = filenr + 1
+        filenr_str = str(filenr)
+        print(filenr_str + ". " + file) #Printer alle tiljengelige filer
     while True:
-        valgtfil = input("Velg en fil: ")
+        
+        print("Velg en fil fra 1-" + filenr_str, end="")
+        valgtfiltall = input(": ")
+        valgtfiltall_int = int(valgtfiltall)
         riktig_filnavn = False
-        for file in dirlist: #sjekker om filnavn finnes
-            if valgtfil == file:
+        for file in dirlist:
+            if file == dirlist[valgtfiltall_int - 1]:
+                valgtfil = file
                 riktig_filnavn = True
         if riktig_filnavn == False:
             input("Fant ikke fil. Trykk enter for å prøve på nytt.")
         elif riktig_filnavn == True:
-            break
+            break #Hvis filnavn finnes, fortsetter funksjonen
     if tall == "1":
         søk_i_fil(valgtfil)
     elif tall == "3":
@@ -67,11 +72,11 @@ def søk_i_fil(filnavn):
             totaltreff = 0
             for file in dirlist:
                 treff = finnsøk(søk, file)
-                totaltreff = treff + totaltreff
+                totaltreff = treff + totaltreff #Finner totalen av antall treff i alle filer
                 if ferdig == int(len(dirlist)):
                     print(" ")
                     print("Alle filer sjekket")
-                    print("Totalt", totaltreff, "treff funnet i alle filer")
+                    print("Totalt", totaltreff, "treff funnet i alle filer") #Printer totalt antall treff
                 else:    
                     print(" ")
                     input("Trykk enter for neste fil.")
@@ -124,24 +129,11 @@ def skriv_til_fil(valgtfil):
     lines = f.readlines()
     wf = open(path, "a+") #Åpnet som a+ for å redigere og skrive nytt
     total_linjer = len(lines)
-    total_linjer_str = json.dumps(total_linjer)  
+    total_linjer_str = str(total_linjer)
     while True: #loop hvis brukerinput er feil
+        print(valgtfil)
         print("Velg en linje fra 1-" + total_linjer_str + ", eller skriv \"N\" for ny linje", end="")# input kan ikke ha flere ledd, så måtte skrive ut som print først
-        valgt_linje = input(": ")
-        try:
-            valgt_linje_int = int(valgt_linje) #sjekker om valgt linje kan bli int
-        except ValueError:
-            if valgt_linje == "n" or valgt_linje == "N": #for å skrive på ny linje
-                print("Skriv inn på ny linje", total_linjer + 1, ":")
-                nytekst = input("Skriv her: ")
-                wf.write("\n" + nytekst)
-                wf.flush()
-                input("Tekst skrevet inn. Trykk enter for å fortsette.")
-                start()
-                break
-            else:
-                input("Ugyldig input. Trykk enter for å prøve på nytt")
-                continue
+        valgt_linje = input(": ")            
         if total_linjer == 0:
             print("Fil har ingen linje å redigere.")
             while True: 
@@ -154,12 +146,38 @@ def skriv_til_fil(valgtfil):
                     break
                 else:
                     input("Ugyldig input. Trykk enter for å fortsette")
+        try:
+            valgt_linje_int = int(valgt_linje) #sjekker om valgt linje kan bli int        
 
-        elif 0 < valgt_linje_int <= total_linjer: # sjekker om valgt linje finnes
+        except ValueError:
+            if valgt_linje == "n" or valgt_linje == "N": #for å skrive på ny linje
+                print("Skriv inn på ny linje", total_linjer + 1)
+                nytekst = input("Skriv her: ")
+                wf.write("\n" + nytekst)
+                wf.flush()
+                input("Tekst skrevet inn. Trykk enter for å fortsette.")
+                while True:
+                    print(" ")
+                    skriv_igjen = input("Vil du skrive ny igjen? Y/N: ")
+                    if skriv_igjen == "N" or skriv_igjen == "n":  #Sjekker om input er gyldig
+                        start()
+                        break
+                    elif skriv_igjen == "Y" or skriv_igjen == "y":
+                        skriv_til_fil(valgtfil)
+                        break
+                    else:
+                        input("Ugyldig input. Trykk enter for å prøve igjen.")
+
+                break
+            else:
+                input("Ugyldig input. Trykk enter for å prøve på nytt")
+                continue
+
+
+        if 0 < valgt_linje_int <= total_linjer: # sjekker om valgt linje finnes
             endre_linje(valgt_linje_int, path, valgtfil)
             break
         else:
-            print(" ")
             input("Nummer er utenfor rekkevidde. Trykk enter for å prøve på nytt.")
         
 
@@ -196,11 +214,11 @@ def endre_linje(tall, filvei, fil): #Funksjon for å endre linje som finnes
     print("Linje redigert.")
     while True:
         print(" ")
-        søk_igjen = input("Vil du redigere linje igjen? Y/N: ")
-        if søk_igjen == "N" or søk_igjen == "n":  #Sjekker om input er gyldig
+        rediger_igjen = input("Vil du redigere linje igjen? Y/N: ")
+        if rediger_igjen == "N" or rediger_igjen == "n":  #Sjekker om input er gyldig
             start()
             break
-        elif søk_igjen == "Y" or søk_igjen == "y":
+        elif rediger_igjen == "Y" or rediger_igjen == "y":
             skriv_til_fil(fil)
         else:
             input("Ugyldig input. Trykk enter for å prøve igjen.")
@@ -215,7 +233,6 @@ def lag_fil():
         filtrert_filnavn = nyfilnavn.replace(" ", "-").replace(".", "-") #filtrerer filnavn
         try:
             f = open(filepath + "\\" + filtrert_filnavn + ".txt", 'x') #lager filen
-            
             break
         except:
             print("Fil finnes allerede")

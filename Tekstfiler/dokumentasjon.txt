@@ -1,0 +1,28 @@
+Mandag: 
+Var syk.
+
+Tirsdag: 
+Lagde mvp som kunne søke filer, og markere tekst som var lik søket.
+planla andre funksjoner jeg ville legge til i prosjektet.
+lagde søk i alle filer funksjon.
+
+Onsdag:
+La til at total antall treff ble printet ut.
+lagde funksjon som skrev inn i fil på ny linje.
+Prøvde å få programmet til å skrive ut tekst som bruker kunne redigere, virket vanskelig.
+Begynte å skrive notater og rydde kode.
+
+Torsdag:
+Brukte mye tid på forenkle kode. For eksempel å slå sammen like funksjoner, og bryte ned store funksjoner til mindre funksjoner.
+Skrev masse notater.
+fikk til å lage tekst som bruker kunne redigere ved å imitere at bruker skrev det inn med pyautogui.
+Det var ikke tydelig at teksten kunne redigeres, så jeg prøvde å få teksten til å bli skrevet inn en og en.
+Fikk det til ved å skrive in tekst en og en  som ikke kunne redigeres, så overskrive det med tekst som kunne redigeres til slutt.
+
+Fredag:
+Lagde lag fil funksjon.
+Lagde minimal søkemotor.
+Finpiusset og skrev mer notater.
+Fikk tilbakemelding av bruker (Simen), og hørte på forslag.
+
+Prøvde å skrive dokumentasjon med skriv inn i fil funksjonen, men æøå funker desverre ikke.
